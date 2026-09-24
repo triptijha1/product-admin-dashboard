@@ -14,4 +14,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    // Ignore cancelled requests
+    if (error.code === "ERR_CANCELED") {
+      return Promise.reject(error);
+    }
+
+    console.error(
+      "API ERROR:",
+      error.response?.status,
+      error.response?.data || error.message
+    );
+
+    return Promise.reject(error);
+  }
+);
+
+
 export default api;

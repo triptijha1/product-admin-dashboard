@@ -1,5 +1,9 @@
 import api from "@/lib/axios";
 
+import type {
+  ProductFormData,
+} from "@/types/product";
+
 export const getProducts = async (
   limit: number,
   skip: number
@@ -13,20 +17,24 @@ export const getProducts = async (
 
 export const searchProducts = async (
   query: string,
+  limit: number,
+  skip: number,
   signal?: AbortSignal
 ) => {
   const response = await api.get(
-    `/products/search?q=${encodeURIComponent(query)}`,
-    {
-      signal,
-    }
+    `/products/search?q=${encodeURIComponent(
+      query
+    )}&limit=${limit}&skip=${skip}`,
+    { signal }
   );
 
   return response.data;
 };
 
 export const getCategories = async () => {
-  const response = await api.get("/products/categories");
+  const response = await api.get(
+    "/products/categories"
+  );
 
   return response.data;
 };
@@ -44,40 +52,29 @@ export const getProductsByCategory = async (
 };
 
 export const getProductById = async (
-  id: string,
-  signal?: AbortSignal
+  id: string
 ) => {
-  console.log("Fetching product ID:", id);
-
   const response = await api.get(
-    `/products/${id}`,
-    {
-      signal,
-    }
+    `/products/${id}`
   );
 
   return response.data;
 };
 
-export const addProduct = async (product: {
-  title: string;
-  price: number;
-  category: string;
-  stock: number;
-}) => {
-  const response = await api.post("/products/add", product);
+export const addProduct = async (
+  product: ProductFormData
+) => {
+  const response = await api.post(
+    "/products/add",
+    product
+  );
 
   return response.data;
 };
 
 export const updateProduct = async (
   id: string,
-  product: {
-    title: string;
-    price: number;
-    category: string;
-    stock: number;
-  }
+  product: ProductFormData
 ) => {
   const response = await api.put(
     `/products/${id}`,
@@ -87,8 +84,12 @@ export const updateProduct = async (
   return response.data;
 };
 
-export const deleteProduct = async (id: string) => {
-  const response = await api.delete(`/products/${id}`);
+export const deleteProduct = async (
+  id: string
+) => {
+  const response = await api.delete(
+    `/products/${id}`
+  );
 
   return response.data;
 };

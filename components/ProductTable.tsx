@@ -2,23 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import { deleteProduct } from "@/services/productApi";
+import type { Product } from "@/types/product";
 
-type Product = {
-  id: number;
-  title: string;
-  category: string;
-  price: number;
-  rating: number;
-  stock: number;
-  thumbnail: string;
-};
+
 
 type ProductTableProps = {
   products: Product[];
+  onDelete: (id: number) => void;
 };
 
 export default function ProductTable({
   products,
+  onDelete,
 }: ProductTableProps) {
   const router = useRouter();
 
@@ -49,9 +44,10 @@ export default function ProductTable({
     try {
       await deleteProduct(String(id));
 
+      onDelete(id);
+
       alert("Product deleted successfully!");
 
-      window.location.reload();
     } catch (error) {
       console.error(
         "DELETE PRODUCT ERROR:",
@@ -69,16 +65,16 @@ export default function ProductTable({
       ========================= */}
 
       <div className="hidden md:block">
-        <table>
+        <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th>Image</th>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th>Rating</th>
-              <th>Stock</th>
-              <th>Actions</th>
+              <th className="px-4 py-3 text-left">Image</th>
+              <th className="px-4 py-3 text-left">Title</th>
+              <th className="px-4 py-3 text-left">Category</th>
+              <th className="px-4 py-3 text-left">Price</th>
+              <th className="px-4 py-3 text-left">Rating</th>
+              <th className="px-4 py-3 text-left">Stock</th>
+              <th className="px-4 py-3 text-left">Actions</th>
             </tr>
           </thead>
 
@@ -91,7 +87,7 @@ export default function ProductTable({
                 }
                 className="cursor-pointer"
               >
-                <td>
+                <td className="px-4 py-3">
                   {product.thumbnail ? (
                     <img
                       src={product.thumbnail}
@@ -104,27 +100,27 @@ export default function ProductTable({
                   )}
                 </td>
 
-                <td>
+                <td className="px-4 py-3">
                   {product.title}
                 </td>
 
-                <td>
+                <td className="px-4 py-3">
                   {product.category}
                 </td>
 
-                <td>
+                <td className="px-4 py-3">
                   ${product.price}
                 </td>
 
-                <td>
+                <td className="px-4 py-3">
                   ⭐ {product.rating}
                 </td>
 
-                <td>
+                <td className="px-4 py-3">
                   {product.stock}
                 </td>
 
-                <td>
+                <td className="px-4 py-3">
                   <button
                     onClick={(e) =>
                       handleDelete(

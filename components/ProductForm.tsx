@@ -1,31 +1,21 @@
 "use client";
 
 import { useState } from "react";
-
 import {
   addProduct,
   updateProduct,
 } from "@/services/productApi";
+import type {
+  ProductFormData,
+  ProductResponse,
+} from "@/types/product";
 
-type ProductData = {
-  title: string;
-  price: number;
-  category: string;
-  stock: number;
-};
 
-type Product = ProductData & {
-  id: number;
-  rating?: number;
-  thumbnail?: string;
-};
 
 type ProductFormProps = {
   productId?: string;
-
-  initialData?: ProductData;
-
-  onSuccess?: (product: Product) => void;
+  initialData?: ProductFormData;
+  onSuccess?: (product: ProductResponse) => void;
 };
 
 export default function ProductForm({
@@ -229,3 +219,4 @@ export default function ProductForm({
     </form>
   );
 }
+

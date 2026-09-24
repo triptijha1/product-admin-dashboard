@@ -55,7 +55,14 @@ export default function EditProductPage() {
           category: product.category,
           stock: product.stock,
         }}
-        onSuccess={() => router.push(`/products/${params.id}`)}
+        onSuccess={(updatedProduct) => {
+          console.log(
+            "PRODUCT UPDATED:",
+            updatedProduct
+          );
+
+          router.push(`/products/${params.id}`);
+        }}
       />
     </main>
   );

@@ -7,11 +7,15 @@ import api from "@/lib/axios";
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (loading) return;
+    setLoading(true);
 
     try {
       const response = await api.post("/auth/login", {
@@ -27,6 +31,8 @@ export default function LoginPage() {
       router.push("/");
     } catch (error) {
       console.error("LOGIN ERROR:", error);
+    }finally {
+      setLoading(false);
     }
   };
 
@@ -49,7 +55,12 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button type="submit">Login</button>
+        <button
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Login"}
+      </button>
       </form>
     </main>
   );
