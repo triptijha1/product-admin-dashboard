@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Product Admin Dashboard
 
-## Getting Started
+A responsive product management dashboard built with Next.js, React, Tailwind CSS, and Axios using the DummyJSON API.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- User login and logout
+- Protected product dashboard
+- Product listing
+- Responsive desktop table and mobile cards
+- Pagination with page size 10, 20, and 50
+- Search with debounce
+- Category filtering
+- Sorting by:
+  - Price
+  - Rating
+  - Title
+- Product details page
+- Add product
+- Edit product
+- Delete product with confirmation
+- Form validation
+- Loading, empty, and error states
+- Retry functionality
+- URL-based page, search, category, and sort state
+- Request cancellation for search race-condition handling
+- Prevents multiple Login/Save requests
+- Shared Axios configuration
+- Centralized API error handling
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Next.js 16
+- React
+- TypeScript
+- Tailwind CSS
+- Axios
+- DummyJSON API
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```text
+app/
+├── login/
+│   └── page.tsx
+├── products/
+│   └── [id]/
+│       ├── page.tsx
+│       └── edit/
+│           └── page.tsx
+└── page.tsx
 
-To learn more about Next.js, take a look at the following resources:
+components/
+├── DashboardHeader.tsx
+├── EmptyState.tsx
+├── ErrorState.tsx
+├── LoadingState.tsx
+├── Pagination.tsx
+├── ProductFilters.tsx
+├── ProductForm.tsx
+├── ProductTable.tsx
+└── SearchBar.tsx
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+lib/
+└── axios.ts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+services/
+└── productApi.ts
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+types/
+└── product.ts
