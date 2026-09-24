@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -72,7 +72,7 @@ const sortProducts = (
   return sortedProducts;
 };
 
-export default function Home() {
+function Dashboard() {
   // =========================
   // State
   // =========================
@@ -693,5 +693,21 @@ export default function Home() {
           </>
         )}
     </main>
+  );
+}
+
+function DashboardFallback() {
+  return (
+    <main className="min-h-screen bg-gray-50 p-6">
+      <LoadingState />
+    </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<DashboardFallback />}>
+      <Dashboard />
+    </Suspense>
   );
 }
