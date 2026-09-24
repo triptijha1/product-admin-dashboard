@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
+
 import {
   addProduct,
   updateProduct,
 } from "@/services/productApi";
+
 import type {
   ProductFormData,
   ProductResponse,
 } from "@/types/product";
-
-
 
 type ProductFormProps = {
   productId?: string;
@@ -40,7 +40,6 @@ export default function ProductForm({
   );
 
   const [error, setError] = useState("");
-
   const [saving, setSaving] = useState(false);
 
   const isEdit = Boolean(productId);
@@ -52,22 +51,17 @@ export default function ProductForm({
 
     setError("");
 
-    // Prevent multiple requests
     if (saving) return;
 
-    // =========================
     // Validation
-    // =========================
 
     if (!title.trim()) {
-      setError("Title is required");
+      setError("Product title is required");
       return;
     }
 
     if (!price || Number(price) <= 0) {
-      setError(
-        "Price must be greater than 0"
-      );
+      setError("Price must be greater than 0");
       return;
     }
 
@@ -77,57 +71,33 @@ export default function ProductForm({
     }
 
     if (!stock || Number(stock) < 0) {
-      setError(
-        "Stock cannot be negative"
-      );
+      setError("Stock cannot be negative");
       return;
     }
 
     try {
       setSaving(true);
 
-      const data = {
+      const data: ProductFormData = {
         title: title.trim(),
         price: Number(price),
         category: category.trim(),
         stock: Number(stock),
       };
 
-      let product;
-
-      // =========================
-      // EDIT
-      // =========================
+      let product: ProductResponse;
 
       if (isEdit) {
         product = await updateProduct(
           productId!,
           data
         );
-
-        console.log(
-          "PRODUCT UPDATED:",
-          product
-        );
-      }
-
-      // =========================
-      // ADD
-      // =========================
-
-      else {
+      } else {
         product = await addProduct(data);
-
-        console.log(
-          "PRODUCT CREATED:",
-          product
-        );
       }
 
-      // Send product to parent
       onSuccess?.(product);
 
-      // Reset only after ADD
       if (!isEdit) {
         setTitle("");
         setPrice("");
@@ -159,64 +129,153 @@ export default function ProductForm({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>
-        {isEdit
-          ? "Edit Product"
-          : "Add Product"}
-      </h2>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6"
+    >
+      {/* Heading */}
+
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900">
+          {isEdit
+            ? "Edit Product"
+            : "Add Product"}
+        </h2>
+
+        <p className="mt-1 text-sm text-gray-500">
+          {isEdit
+            ? "Update the product details."
+            : "Add a new product to your inventory."}
+        </p>
+      </div>
+
+      {/* Error */}
 
       {error && (
-        <p>{error}</p>
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm text-red-600">
+            {error}
+          </p>
+        </div>
       )}
 
-      <input
-        type="text"
-        placeholder="Product title"
-        value={title}
-        onChange={(e) =>
-          setTitle(e.target.value)
-        }
-      />
+      {/* Title */}
 
-      <input
-        type="number"
-        placeholder="Price"
-        value={price}
-        onChange={(e) =>
-          setPrice(e.target.value)
-        }
-      />
+      <div>
+        <label
+          htmlFor="title"
+          className="mb-2 block text-sm font-medium text-gray-700"
+        >
+          Product Title
+        </label>
 
-      <input
-        type="text"
-        placeholder="Category"
-        value={category}
-        onChange={(e) =>
-          setCategory(e.target.value)
-        }
-      />
+        <input
+          id="title"
+          type="text"
+          placeholder="Enter product title"
+          value={title}
+          onChange={(e) =>
+            setTitle(e.target.value)
+          }
+          className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        />
+      </div>
 
-      <input
-        type="number"
-        placeholder="Stock"
-        value={stock}
-        onChange={(e) =>
-          setStock(e.target.value)
-        }
-      />
+      {/* Price + Category */}
 
-      <button
-        type="submit"
-        disabled={saving}
-      >
-        {saving
-          ? "Saving..."
-          : isEdit
-          ? "Update Product"
-          : "Add Product"}
-      </button>
+      <div className="grid gap-5 md:grid-cols-2">
+
+        {/* Price */}
+
+        <div>
+          <label
+            htmlFor="price"
+            className="mb-2 block text-sm font-medium text-gray-700"
+          >
+            Price
+          </label>
+
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+              $
+            </span>
+
+            <input
+              id="price"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              value={price}
+              onChange={(e) =>
+                setPrice(e.target.value)
+              }
+              className="w-full rounded-lg border border-gray-300 py-3 pl-8 pr-4 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+
+        {/* Category */}
+
+        <div>
+          <label
+            htmlFor="category"
+            className="mb-2 block text-sm font-medium text-gray-700"
+          >
+            Category
+          </label>
+
+          <input
+            id="category"
+            type="text"
+            placeholder="e.g. beauty"
+            value={category}
+            onChange={(e) =>
+              setCategory(e.target.value)
+            }
+            className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          />
+        </div>
+      </div>
+
+      {/* Stock */}
+
+      <div>
+        <label
+          htmlFor="stock"
+          className="mb-2 block text-sm font-medium text-gray-700"
+        >
+          Stock
+        </label>
+
+        <input
+          id="stock"
+          type="number"
+          min="0"
+          placeholder="Enter stock quantity"
+          value={stock}
+          onChange={(e) =>
+            setStock(e.target.value)
+          }
+          className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        />
+      </div>
+
+      {/* Button */}
+
+      <div className="flex justify-end border-t pt-5">
+        <button
+          type="submit"
+          disabled={saving}
+          className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {saving
+            ? "Saving..."
+            : isEdit
+            ? "Update Product"
+            : "Add Product"}
+        </button>
+      </div>
     </form>
   );
 }
-

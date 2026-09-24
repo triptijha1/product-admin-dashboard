@@ -4,6 +4,44 @@ import type {
   ProductFormData,
 } from "@/types/product";
 
+const STORAGE_KEY = "productOverrides";
+
+const getStoredOverrides = () => {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
+  const stored = localStorage.getItem(STORAGE_KEY);
+
+  if (!stored) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return {};
+  }
+};
+
+const saveOverride = (
+  id: string,
+  product: any
+) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const overrides = getStoredOverrides();
+
+  overrides[id] = product;
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(overrides)
+  );
+};
+
 export const getProducts = async (
   limit: number,
   skip: number
@@ -12,7 +50,15 @@ export const getProducts = async (
     `/products?limit=${limit}&skip=${skip}`
   );
 
-  return response.data;
+  const data = response.data;
+  const overrides = getStoredOverrides();
+
+  data.products = data.products.map(
+    (product: any) =>
+      overrides[String(product.id)] || product
+  );
+
+  return data;
 };
 
 export const searchProducts = async (
@@ -22,13 +68,21 @@ export const searchProducts = async (
   signal?: AbortSignal
 ) => {
   const response = await api.get(
-    `/products/search?q=${encodeURIComponent(
-      query
-    )}&limit=${limit}&skip=${skip}`,
+   `/products/search?q=${encodeURIComponent(
+  query
+)}&limit=${limit}&skip=${skip}`,
     { signal }
   );
 
-  return response.data;
+  const data = response.data;
+  const overrides = getStoredOverrides();
+
+  data.products = data.products.map(
+    (product: any) =>
+      overrides[String(product.id)] || product
+  );
+
+  return data;
 };
 
 export const getCategories = async () => {
@@ -48,7 +102,15 @@ export const getProductsByCategory = async (
     `/products/category/${category}?limit=${limit}&skip=${skip}`
   );
 
-  return response.data;
+  const data = response.data;
+  const overrides = getStoredOverrides();
+
+  data.products = data.products.map(
+    (product: any) =>
+      overrides[String(product.id)] || product
+  );
+
+  return data;
 };
 
 export const getProductById = async (
@@ -58,7 +120,11 @@ export const getProductById = async (
     `/products/${id}`
   );
 
-  return response.data;
+  const overrides = getStoredOverrides();
+
+  return (
+    overrides[id] || response.data
+  );
 };
 
 export const addProduct = async (
@@ -69,7 +135,14 @@ export const addProduct = async (
     product
   );
 
-  return response.data;
+  const createdProduct = response.data;
+
+  saveOverride(
+    String(createdProduct.id),
+    createdProduct
+  );
+
+  return createdProduct;
 };
 
 export const updateProduct = async (
@@ -81,7 +154,15 @@ export const updateProduct = async (
     product
   );
 
-  return response.data;
+  const updatedProduct = {
+    ...response.data,
+    ...product,
+    id: Number(id),
+  };
+
+  saveOverride(id, updatedProduct);
+
+  return updatedProduct;
 };
 
 export const deleteProduct = async (

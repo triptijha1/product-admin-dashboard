@@ -8,17 +8,20 @@ import { getProductById } from "@/services/productApi";
 type Review = {
   rating: number;
   comment: string;
+  date: string;
   reviewerName: string;
+  reviewerEmail: string;
 };
 
 type Product = {
   id: number;
   title: string;
-  description: string;
   category: string;
+  description: string;
   price: number;
   rating: number;
   stock: number;
+  thumbnail: string;
   images: string[];
   reviews: Review[];
 };
@@ -37,56 +40,29 @@ export default function ProductDetailsPage() {
     useState("");
 
   useEffect(() => {
-    const controller = new AbortController();
-
     const fetchProduct = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const id = String(params.id);
-
         const data = await getProductById(
-          id,
-          controller.signal
+          String(params.id)
         );
 
-        // Ignore result if request
-        // was cancelled
-        if (controller.signal.aborted) {
-          return;
-        }
-
         setProduct(data);
-      } catch (error: any) {
-        // Ignore cancelled request
-        if (
-          error.name === "CanceledError" ||
-          error.name === "AbortError"
-        ) {
-          return;
-        }
-
+      } catch (error) {
         console.error(
-          "Failed to fetch product:",
+          "FETCH PRODUCT ERROR:",
           error
         );
 
-        setError(
-          "Product not found"
-        );
+        setError("Product not found");
       } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
     fetchProduct();
-
-    return () => {
-      controller.abort();
-    };
   }, [params.id]);
 
   // =========================
@@ -95,33 +71,41 @@ export default function ProductDetailsPage() {
 
   if (loading) {
     return (
-      <main>
-        <p>Loading product...</p>
+      <main className="min-h-screen bg-gray-50 p-6">
+        <div className="rounded-xl bg-white p-8 text-center shadow-sm">
+          <p className="text-gray-500">
+            Loading product...
+          </p>
+        </div>
       </main>
     );
   }
 
   // =========================
-  // Error
+  // Product Not Found
   // =========================
 
   if (error || !product) {
     return (
-      <main>
-        <h1>Product Not Found</h1>
+      <main className="min-h-screen bg-gray-50 p-6">
+        <div className="mx-auto max-w-2xl rounded-xl bg-white p-8 text-center shadow-sm">
+          <h1 className="mb-3 text-2xl font-bold">
+            Product Not Found
+          </h1>
 
-        <p>
-          The requested product
-          does not exist.
-        </p>
+          <p className="mb-6 text-gray-500">
+            The requested product does not exist.
+          </p>
 
-        <button
-          onClick={() =>
-            router.push("/")
-          }
-        >
-          Back to Products
-        </button>
+          <button
+            onClick={() =>
+              router.push("/")
+            }
+            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            Back to Products
+          </button>
+        </div>
       </main>
     );
   }
@@ -131,102 +115,167 @@ export default function ProductDetailsPage() {
   // =========================
 
   return (
-    <main>
-      {/* Back */}
+    <main className="min-h-screen bg-gray-50 p-6">
+      <div className="mx-auto max-w-6xl">
 
-      <button
-        onClick={() =>
-          router.push("/")
-        }
-      >
-        ← Back to Products
-      </button>
+        {/* Top buttons */}
 
-      {/* Title */}
+        <div className="mb-6 flex items-center justify-between">
+          <button
+            onClick={() => router.back()}
+            className="rounded-lg border bg-white px-4 py-2 hover:bg-gray-100"
+          >
+            ← Back to Products
+          </button>
 
-      <h1>{product.title}</h1>
+          <button
+            onClick={() =>
+              router.push(
+                `/products/${product.id}/edit`
+              )
+            }
+            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            Edit Product
+          </button>
+        </div>
 
-      <p>
-        Category:{" "}
-        {product.category}
-      </p>
+        {/* Product information */}
 
-      {/* Images */}
+        <section className="rounded-xl bg-white p-6 shadow-sm">
 
-      <div>
-        {product.images.map(
-          (image, index) => (
-            <img
-              key={`${product.id}-${index}`}
-              src={image}
-              alt={`${product.title} ${
-                index + 1
-              }`}
-              width={250}
-              height={250}
-            />
-          )
-        )}
-      </div>
+          <div className="grid gap-8 md:grid-cols-2">
 
-      {/* Description */}
+            {/* Images */}
 
-      <h2>Description</h2>
+            <div>
+              <div className="mb-4 flex justify-center rounded-xl bg-gray-50 p-6">
+                {product.thumbnail ? (
+                  <img
+                    src={product.thumbnail}
+                    alt={product.title}
+                    className="h-80 w-80 object-contain"
+                  />
+                ) : (
+                  <div className="flex h-80 w-80 items-center justify-center text-gray-400">
+                    No image
+                  </div>
+                )}
+              </div>
 
-      <p>
-        {product.description}
-      </p>
-
-      {/* Price */}
-
-      <h2>
-        ${product.price}
-      </h2>
-
-      {/* Rating */}
-
-      <p>
-        ⭐ Rating:{" "}
-        {product.rating}
-      </p>
-
-      {/* Stock */}
-
-      <p>
-        Stock: {product.stock}
-      </p>
-
-      {/* Reviews */}
-
-      <h2>Reviews</h2>
-
-      {product.reviews &&
-      product.reviews.length > 0 ? (
-        product.reviews.map(
-          (review, index) => (
-            <div
-              key={`${product.id}-review-${index}`}
-            >
-              <strong>
-                {review.reviewerName}
-              </strong>
-
-              <p>
-                ⭐{" "}
-                {review.rating}
-              </p>
-
-              <p>
-                {review.comment}
-              </p>
+              {product.images &&
+                product.images.length > 0 && (
+                  <div className="flex gap-3 overflow-x-auto">
+                    {product.images.map(
+                      (image, index) => (
+                        <img
+                          key={`${image}-${index}`}
+                          src={image}
+                          alt={`${product.title} ${
+                            index + 1
+                          }`}
+                          className="h-20 w-20 rounded-lg border object-contain p-2"
+                        />
+                      )
+                    )}
+                  </div>
+                )}
             </div>
-          )
-        )
-      ) : (
-        <p>
-          No reviews available.
-        </p>
-      )}
+
+            {/* Product details */}
+
+            <div>
+              <p className="mb-2 text-sm font-medium uppercase text-blue-600">
+                {product.category}
+              </p>
+
+              <h1 className="mb-4 text-3xl font-bold">
+                {product.title}
+              </h1>
+
+              <p className="mb-6 text-gray-600">
+                {product.description}
+              </p>
+
+              <div className="mb-6">
+                <p className="text-3xl font-bold">
+                  ${product.price}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <p>
+                  <span className="font-semibold">
+                    Rating:
+                  </span>{" "}
+                  ⭐ {product.rating}
+                </p>
+
+                <p>
+                  <span className="font-semibold">
+                    Stock:
+                  </span>{" "}
+                  {product.stock}
+                </p>
+
+                <p>
+                  <span className="font-semibold">
+                    Product ID:
+                  </span>{" "}
+                  {product.id}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Reviews */}
+
+        <section className="mt-6 rounded-xl bg-white p-6 shadow-sm">
+          <h2 className="mb-6 text-2xl font-bold">
+            Reviews
+          </h2>
+
+          {product.reviews &&
+          product.reviews.length > 0 ? (
+            <div className="space-y-5">
+              {product.reviews.map(
+                (review, index) => (
+                  <div
+                    key={`${review.reviewerEmail}-${index}`}
+                    className="rounded-lg border p-4"
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <h3 className="font-semibold">
+                        {review.reviewerName}
+                      </h3>
+
+                      <span>
+                        ⭐ {review.rating}
+                      </span>
+                    </div>
+
+                    <p className="text-gray-600">
+                      {review.comment}
+                    </p>
+
+                    <p className="mt-2 text-sm text-gray-400">
+                      {new Date(
+                        review.date
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+                )
+              )}
+            </div>
+          ) : (
+            <p className="text-gray-500">
+              No reviews available.
+            </p>
+          )}
+        </section>
+
+      </div>
     </main>
   );
 }
